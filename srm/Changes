@@ -1,5 +1,9 @@
 This is a summary of user visible changes in srm.
 
+release-1_2_8
+
+	Documentation updates.
+
 release-1_2_7
 
 	Minor bugfixes. Correctly handle symlinks. Build with most
@@ -132,3 +136,4 @@ release-0_1_1
 release-0_1_0
 
 	First working version.
+

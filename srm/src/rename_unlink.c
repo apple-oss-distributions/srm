@@ -42,6 +42,16 @@ int rename_unlink(const char *path) {
     p[i] = '\0';
   } while (lstat(new_name, &statbuf) == 0);
 
+  if (lstat(path, &statbuf) == -1)
+    return -1;
+
+  if (S_ISDIR(statbuf.st_mode) && (statbuf.st_nlink > 2)) {
+      /* Directory isn't empty (e.g. because it contains an immutable file).
+         Attempting to remove it will fail, so avoid renaming it. */
+    errno = ENOTEMPTY;
+    return -1;
+  }
+
   if (rename(path, new_name) == -1)
     return -1;
 

@@ -29,6 +29,28 @@
 #include <sys/disk.h>
 #endif
 
+#if HAVE_CHFLAGS
+/* define unsupported flags as 0 */
+# if !defined UF_IMMUTABLE
+#  define UF_IMMUTABLE 0
+# endif
+# if !defined UF_APPEND
+#  define UF_APPEND 0
+# endif
+# if !defined UF_NOUNLINK
+#  define UF_NOUNLINK 0
+# endif
+# if !defined SF_IMMUTABLE
+#  define SF_IMMUTABLE 0
+# endif
+# if !defined SF_APPEND
+#  define SF_APPEND 0
+# endif
+# if !defined SF_NOUNLINK
+#  define SF_NOUNLINK 0
+# endif
+#endif
+
 #include "srm.h"
 
 static int file;
@@ -270,17 +292,20 @@ int sunlink(const char *path) {
    unlink it after we're through messing around. Unlinking it first
    would remove the need for any of these checks, but would leave the
    user with no way to overwrite the file if the process was
-   interupted during the overwriting. So, instead we assume that the
+   interrupted during the overwriting. So, instead we assume that the
    open() above will fail on immutable and append-only files and try
    and catch only platforms supporting NOUNLINK here.
 
-   OpenBSD - doesn't support nounlink (As of 3.1)
-   FreeBSD - supports nounlink (from 4.4 on?)
-   Tru64 - unknown
-   MacOS X - unknown
+   FreeBSD - supports NOUNLINK (from 4.4 on?)
+   MacOS X - doesn't support NOUNLINK (as of 10.3.5)
+   OpenBSD - doesn't support NOUNLINK (as of 3.1)
+   Tru64   - unknown
+   
+   Note: unsupported flags are defined as 0 at the top of this file,
+   so a specific platform check is not required here.
 */
 
-#if HAVE_CHFLAGS && __FreeBSD__
+#if HAVE_CHFLAGS
   if ((statbuf.st_flags & UF_IMMUTABLE) || 
       (statbuf.st_flags & UF_APPEND) ||
       (statbuf.st_flags & UF_NOUNLINK) || 
